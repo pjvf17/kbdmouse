@@ -198,19 +198,10 @@ def click(button, press):
 def moveToMap():
     global X
     global Y
-    moveTo(.83,.83);
-
-def moveTo(x, y, perc=True):
-    global X
-    global Y
-    
-    if (perc):
-        xBound,yBound = pyautogui.size()
-        pyautogui.moveTo(xBound*x,yBound*y);
-    else:
-        pyautogui.moveTo(x,y);
+    xBound,yBound = pyautogui.size()
+    pyautogui.moveTo(.83*xBound, 0.83*yBound)
     X,Y = pyautogui.position();
-    
+
 def toggleHold():
     global hold
     hold = not hold
@@ -275,8 +266,6 @@ hotkeys = {
     frozenset(('ctrl', 'g')): HotKey(stop,()),
     frozenset(('l')): HotKey(lambda: reset(), lambda:()),
     frozenset(('m')): HotKey(lambda: moveToMap(), lambda:()),
-    frozenset(('f')): HotKey(lambda: moveTo(.05,.5), lambda:()),
-    frozenset(('c')): HotKey(lambda: moveTo(.95,.5), lambda:()),
     frozenset((',')): HotKey(lambda: toggleHold(), lambda:()),
     frozenset(('.')): HotKey(lambda: center(), lambda:()),
     frozenset(('g')): HotKey(lambda: click("left", True), lambda: click("left", False)),
@@ -289,13 +278,11 @@ hotkeys = {
     # down
     frozenset(('n')): HotKey(lambda: angle(0,-1), lambda: dangle(0,-1, True)),
     frozenset({'shift'}): HotKey(lambda: speed_change(10, False), lambda: speed_change(SPEED_DEFAULT, False, True)),
-    frozenset({'\\'}): HotKey(lambda: speed_change(50, False, True), lambda: speed_change(SPEED_DEFAULT, False, True)),
+    frozenset({'shift_r'}): HotKey(lambda: speed_change(30, False, True), lambda: speed_change(SPEED_DEFAULT, False, True)),
     frozenset({'u'}): HotKey(lambda: speed_change(0.6, False, True), lambda: speed_change(SPEED_DEFAULT, False, True)),
-    frozenset({'h'}): HotKey(lambda: scroll(-15), lambda: scroll(-15),
+    frozenset({'h'}): HotKey(lambda: scroll(-10), lambda: scroll(-10),
                              priority=1),
-    frozenset({'k'}): HotKey(lambda: scroll(-15), lambda: scroll(-15),
-                             priority=1),
-    frozenset({'backspace'}): HotKey(lambda: scroll(15), lambda: scroll(-15)),
+    frozenset({'backspace'}): HotKey(lambda: scroll(10), lambda: scroll(-10)),
    # frozenset({'k'}): HotKey(lambda: scroll(10), lambda: scroll(-10)),
   #  frozenset({'i'}): HotKey(lambda: scroll(10), lambda: scroll(-10)),
  #   frozenset({'space'}): HotKey(lambda: scroll(10), lambda: scroll(-10)),
@@ -392,7 +379,6 @@ def keybind_check(key,press, pressed):
             else:
                 bind[1].release()
                 bind[1].pressed = False
-            # honestly not sure what this is doing   
             if (bind[1].priority > 0):
                 return
     print("end check section")
