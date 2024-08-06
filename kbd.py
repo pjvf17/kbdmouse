@@ -3,6 +3,7 @@ from pynput import keyboard
 import sys
 import math
 import threading
+import asyncio
 
 # 
 lock = threading.Lock()
@@ -124,7 +125,6 @@ def angle(x,y):
     global lock
     curAng[0] += x
     curAng[1] += y
-    print(curAng)
     t = threading.Thread(target=lockAngle)
     t.start()
     
@@ -252,13 +252,17 @@ actions = {
 
 class HotKey:
     def __init__(self, press, release, pressArgs=None, releaseArgs=None, priority = 0):
+        self.pressString = press
+        self.releaseString = release
+        self.pressArgs = pressArgs
+        self.releaseArgs = releaseArgs
         self.press = lambda: actions.get(press)(*(pressArgs if pressArgs is not None else []))
-        print(pressArgs if pressArgs is not None else [])
         self.release = lambda: actions.get(release)(*(releaseArgs if releaseArgs is not None else []))
         self.pressed = False
         self.priority = priority
     def __repr__(self):
-        return f"HotKey(press={self.press}, release={self.release}, priority={self.priority}, pressed={self.pressed})"
+        return f"""press={self.pressString}{f', args: {self.pressArgs}' if self.pressArgs is not None else ''} | release={self.releaseString}, {f'args: {self.releaseArgs}' if self.releaseArgs is not None else ''}"""
+
 
 
 #1: oeuhtn
@@ -316,15 +320,15 @@ hotkeys = {
     frozenset({'backspace'}): HotKey("scroll", "scroll", pressArgs=[15], releaseArgs=[-15]),
     frozenset(('ctrl_r', pauseKey)): HotKey("pause", None),
     frozenset(('ctrl', pauseKey)): HotKey("pause", None),
-    frozenset(('1')): HotKey("prefix", None, pressArgs=[1]),
-    frozenset(('2')): HotKey("prefix", None, pressArgs=[2]),
-    frozenset(('3')): HotKey("prefix", None, pressArgs=[3]),
-    frozenset(('4')): HotKey("prefix", None, pressArgs=[4]),
-    frozenset(('5')): HotKey("prefix", None, pressArgs=[5]),
-    frozenset(('6')): HotKey("prefix", None, pressArgs=[6]),
-    frozenset(('7')): HotKey("prefix", None, pressArgs=[7]),
-    frozenset(('8')): HotKey("prefix", None, pressArgs=[8]),
-    frozenset(('9')): HotKey("prefix", None, pressArgs=[9]),
+    # frozenset(('1')): HotKey("prefix", None, pressArgs=[1]),
+    # frozenset(('2')): HotKey("prefix", None, pressArgs=[2]),
+    # frozenset(('3')): HotKey("prefix", None, pressArgs=[3]),
+    # frozenset(('4')): HotKey("prefix", None, pressArgs=[4]),
+    # frozenset(('5')): HotKey("prefix", None, pressArgs=[5]),
+    # frozenset(('6')): HotKey("prefix", None, pressArgs=[6]),
+    # frozenset(('7')): HotKey("prefix", None, pressArgs=[7]),
+    # frozenset(('8')): HotKey("prefix", None, pressArgs=[8]),
+    # frozenset(('9')): HotKey("prefix", None, pressArgs=[9]),
 }
 
 
@@ -405,7 +409,8 @@ def keybind_check(key,press, pressed):
     print("end check section")
 
 # Collect events until released
-with keyboard.Listener(
+def run():
+    with keyboard.Listener(
         on_press=on_press,
         on_release=on_release) as listener:
-    listener.join()
+        listener.join()

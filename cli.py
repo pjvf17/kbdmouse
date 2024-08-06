@@ -3,9 +3,9 @@ import kbd
 
 def list_command(args):
     # Your logic for the list command
-    print(kbd.curAng)
     for binding, action in kbd.hotkeys.items():
-        print(f"binding: {binding}, action: {action}")
+        print(f"""binding: {binding}, 
+              action: {action}""")
 
 def set_command(args):
     # Your logic for the set command
@@ -21,7 +21,7 @@ def remove_command(args):
 def main():
     parser = argparse.ArgumentParser(description="A simple CLI")
     subparsers = parser.add_subparsers(title="Commands", dest="command")
-    
+
     # List command
     parser_list = subparsers.add_parser('list', help='List something')
     parser_list.set_defaults(func=list_command)
@@ -37,9 +37,13 @@ def main():
     parser_remove.add_argument('key', type=str, help='The key to remove')
     parser_remove.set_defaults(func=remove_command)
     
+    parser.add_argument('--run', action='store_true', help='Run something')
+    
     args = parser.parse_args()
     
-    if args.command is None:
+    if args.run:
+        kbd.run()
+    elif args.command is None:
         parser.print_help()
     else:
         args.func(args)

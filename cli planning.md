@@ -9,7 +9,8 @@ probably argparse
 - -s (positional): set binding
   - key combo
   - action
-  - modifier (speed, position, clicking, etc.)
+  - inputs (speed, position, clicking, etc.)
+    - need these to be in an option list
 - -r (probably by number after options?): remove a binding
 - -l log debug output to a file
 - something that displays key combos
