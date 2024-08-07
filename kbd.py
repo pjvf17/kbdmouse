@@ -215,8 +215,11 @@ def toggleDrag():
     drag = True
 
 def center():
+    global X
+    global Y
     x,y = pyautogui.size()
     pyautogui.moveTo(x/2,y/2)
+    X,Y = pyautogui.position();
 
 def pause():
     global paused
@@ -242,8 +245,8 @@ actions = {
     "dangle": dangle,
     "reset": reset,
     "moveTo": moveTo,
+    "center": center,
     "speedChange": speedChange,
-    # "toggleHold": toggleHold
     "click": click,
     "pause": pause,
     "quit": stop,
@@ -256,10 +259,18 @@ class HotKey:
         self.releaseString = release
         self.pressArgs = pressArgs
         self.releaseArgs = releaseArgs
-        self.press = lambda: actions.get(press)(*(pressArgs if pressArgs is not None else []))
-        self.release = lambda: actions.get(release)(*(releaseArgs if releaseArgs is not None else []))
+        self.press = self.create_action_lambda(press, pressArgs)
+        self.release = self.create_action_lambda(release, releaseArgs)
         self.pressed = False
         self.priority = priority
+
+    def create_action_lambda(self, action, args):
+        if action is None:
+            return lambda: ()
+        if args is None:
+            return lambda: actions.get(action)()
+        return lambda: actions.get(action)(*args)
+        
     def __repr__(self):
         return f"""press={self.pressString}{f', args: {self.pressArgs}' if self.pressArgs is not None else ''} | release={self.releaseString}, {f'args: {self.releaseArgs}' if self.releaseArgs is not None else ''}"""
 
@@ -298,7 +309,7 @@ hotkeys = {
     frozenset(('ctrl_r', 'g')): HotKey("stop", "stop"),
     frozenset(('ctrl', 'g')): HotKey("stop", "stop"),
     frozenset(('l')): HotKey("reset", None),
-    frozenset(('m')): HotKey("moveToMap", None),
+    frozenset(('m')): HotKey("moveTo", None, pressArgs=[.83,.83]),
     frozenset(('f')): HotKey("moveTo", None, pressArgs=[0.05, 0.5]),
     frozenset(('c')): HotKey("moveTo", None, pressArgs=[0.95, 0.5]),
     frozenset((',')): HotKey("toggleHold", None),
