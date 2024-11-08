@@ -9,6 +9,7 @@ lock = threading.Lock()
 sem = threading.Semaphore(2)
 scrollLock = threading.Lock()
 scrollSem = threading.Semaphore(2)
+movingLock = threading.Lock()
 
 # will store the Listener object from pynput.keyboard, for use in stop() function
 listener = None
@@ -33,6 +34,7 @@ X, Y = pyautogui.position()
 
 # Stores a index of key, [hotkey] pairs
 keyMemo = {}
+pyautogui.PAUSE = 0
 
 def moveLoop():
     global pre
@@ -41,26 +43,28 @@ def moveLoop():
     global moving
     global X
     global Y
-    while (curAng[0] != 0 or curAng[1] != 0):
-        pyautogui.PAUSE = 0
+    while curAng[0] != 0 or curAng[1] != 0:
+        X,Y = pyautogui.position()
         curSpeed = speed * pre
         ogX = X
         ogY = Y
-        if (drag == True):
+        if drag:
             pyautogui.mouseDown()
-            curSpeed = curSpeed*100
-            time = .3
-            X,Y = pyautogui.position()
-        X = X+curAng[0]*curSpeed
-        Y = Y+curAng[1]*curSpeed
-        pyautogui.moveTo(X+curAng[0]*curSpeed,Y+curAng[1]*curSpeed)
-        if (drag == True):
+            curSpeed *= 100
+            time = 0.3
+            X, Y = pyautogui.position()
+        if (pyautogui.position()[0] != X or pyautogui.position()[1] != Y): X,Y = pyautogui.position()
+        X += curAng[0] * curSpeed
+        Y += curAng[1] * curSpeed
+        pyautogui.moveTo(X, Y)
+        if drag:
             pyautogui.mouseUp()
-            pyautogui.moveTo(ogX,ogY)
-            X,Y = pyautogui.position()            
+            pyautogui.moveTo(ogX, ogY)
+            X, Y = pyautogui.position()
         drag = False
         pre = 1
     moving = False
+
     
 def scrollLoop():
     global scrolling
@@ -105,13 +109,11 @@ def lockAngle():
     # Outer doesn't block
     r1 = sem.acquire(blocking=False)
     if (r1):
-        # Inner does, allowing percisely one thread to wait for moveLoop to complete
+        # Inner does, allowing precisely one thread to wait for moveLoop to complete
         r2 = lock.acquire()
         if (moving == False):
             moving = True
-            t = threading.Thread(target=moveLoop)
-            t.start()
-            t.join()
+            moveLoop()
             sem.release()
             lock.release()
         else:
@@ -200,11 +202,12 @@ def moveToMap():
     global Y
     moveTo(.83,.83);
 
-def moveTo(x, y, perc=True):
+def moveTo(x, y, percent=True):
     global X
     global Y
-    
-    if (perc):
+    global movingLock
+
+    if (percent):
         xBound,yBound = pyautogui.size()
         pyautogui.moveTo(xBound*x,yBound*y);
     else:
@@ -278,7 +281,7 @@ hotkeys = {
     frozenset(('f')): HotKey(lambda: moveTo(.05,.5), lambda:()),
     frozenset(('c')): HotKey(lambda: moveTo(.95,.5), lambda:()),
     frozenset((',')): HotKey(lambda: toggleHold(), lambda:()),
-    frozenset(('.')): HotKey(lambda: center(), lambda:()),
+    frozenset(('.')): HotKey(lambda: moveTo(.5,.5,True), lambda:()),
     frozenset(('g')): HotKey(lambda: click("left", True), lambda: click("left", False)),
     # left
     frozenset(('o')): HotKey(lambda: angle(-1,0),lambda: dangle(-1,0, True)),

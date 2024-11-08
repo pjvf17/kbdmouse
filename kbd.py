@@ -137,11 +137,24 @@ def dangle(x,y, checkHold):
         t = threading.Thread(target=lockAngle)
         t.start()
 
-def reset():
+def resetAngle():
     global curAng
-    global speed
     curAng = [0,0]
-    speed = 4
+
+def resetSpeed():
+    global speed
+    speed = SPEED_DEFAULT
+
+def resetHold():
+    global hold
+    hold = False
+
+def reset():
+    resetHold()
+    resetAngle()
+    resetSpeed()
+    
+
 
 def speedChange(change,check=True, setVal=False):
     global pre
@@ -208,6 +221,7 @@ def moveTo(x, y, perc=True):
 def toggleHold():
     global hold
     hold = not hold
+    if (not hold): resetAngle()
 #     print(hold)
 
 def toggleDrag():
@@ -247,10 +261,27 @@ actions = {
     "moveTo": moveTo,
     "center": center,
     "speedChange": speedChange,
+    "toggleHold": toggleHold,
     "click": click,
     "pause": pause,
     "quit": stop,
     "scroll": scroll,
+}
+
+actionsKeys = list(actions.keys())
+
+actionArgs = {
+    "angle": ["x", "y"],
+    "dangle": ["x", "y"],
+    "reset": [],
+    "moveTo": ["x", "y", "perc"],
+    "center": [],
+    "speedChange": ["change", "check", "setVal"],
+    "toggleHold": [],
+    "click": ["button", "press"],
+    "pause": [],
+    "quit": [],
+    "scroll": ["amount", "hold"],
 }
 
 class HotKey:
@@ -268,6 +299,7 @@ class HotKey:
         if action is None:
             return lambda: ()
         if args is None:
+            # print(action)
             return lambda: actions.get(action)()
         return lambda: actions.get(action)(*args)
         

@@ -44,7 +44,8 @@ less important:
       - [ ] scroll (in, out)
       - [ ] prefix ?
 - [ ] yo what does hold do
-
+- [ ] check if scroll needs to have scroll as a release action, it looks weird atm
+- [ ] allow a way to reset speed that's not just 'reset'
 ---
 
 perhaps what I'm doing is creating a new HotKey interface of some sort, which can both be the thing that's outputted on print, and what creates a HotKey?
